@@ -11,22 +11,48 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.basicscodelab.ui.theme.BasicsCodelabTheme
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material.Button
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Surface
+import androidx.compose.material.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
             BasicsCodelabTheme {
-                MyApp(listOf("World", "Compose"))
+                MyApp()
             }
         }
     }
 }
 
 @Composable
-fun OnboardingScreen() {
+fun MyApp() {
 
     var shouldShowOnboarding by remember { mutableStateOf(true) }
+
+    if (shouldShowOnboarding) {
+        OnboardingScreen(onContinueClicked = { shouldShowOnboarding = false })
+    } else {
+        Greetings()
+    }
+}
+
+@Composable
+fun OnboardingScreen(onContinueClicked: () -> Unit) {
 
     Surface {
         Column(
@@ -37,7 +63,7 @@ fun OnboardingScreen() {
             Text("Welcome to the Basics Codelab!")
             Button(
                 modifier = Modifier.padding(vertical = 24.dp),
-                onClick = { shouldShowOnboarding = false }
+                onClick = onContinueClicked
             ) {
                 Text("Continue")
             }
@@ -45,31 +71,28 @@ fun OnboardingScreen() {
     }
 }
 
+@Composable
+private fun Greetings(names: List<String> = List(1000) { "$it"}) {
+    LazyColumn(modifier = Modifier.padding(vertical = 4.dp)) {
+        items (items = names) { name ->
+            Greeting(name = name)
+        }
+
+
+    }
+}
+
 @Preview(showBackground = true, widthDp = 320, heightDp = 320)
 @Composable
-fun OnBoardingPreview() {
+fun OnboardingPreview() {
     BasicsCodelabTheme {
-        OnboardingScreen()
+        OnboardingScreen(onContinueClicked = {})
     }
 }
 
 @Composable
-private fun MyApp(names: List<String>) {
-    Surface(
-        color = MaterialTheme.colors.background
-    ) {
-        Column(modifier = Modifier.padding(vertical = 4.dp)) {
-            for (name in names) {
-                Greeting(name = name)
-            }
-        }
-    }
-}
+private fun Greeting(name: String) {
 
-@Composable
-fun Greeting(name: String) {
-
-    // remember is used to guard against recomposition, so the state is not reset.
     val expanded = remember { mutableStateOf(false) }
 
     val extraPadding = if (expanded.value) 48.dp else 0.dp
@@ -81,26 +104,24 @@ fun Greeting(name: String) {
         Row(modifier = Modifier.padding(24.dp)) {
             Column(modifier = Modifier
                 .weight(1f)
-                .padding(bottom = extraPadding)) {
-                Text("Hello,")
-                Text("$name!")
+                .padding(bottom = extraPadding)
+            ) {
+                Text(text = "Hello, ")
+                Text(text = name)
             }
             OutlinedButton(
-                onClick = {
-                    expanded.value = !expanded.value
-                }
+                onClick = { expanded.value = !expanded.value }
             ) {
                 Text(if (expanded.value) "Show less" else "Show more")
             }
         }
     }
-
 }
 
 @Preview(showBackground = true, widthDp = 320)
 @Composable
 fun DefaultPreview() {
     BasicsCodelabTheme {
-        MyApp(listOf("World", "Compose"))
+        Greetings()
     }
 }
